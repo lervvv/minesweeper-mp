@@ -1,0 +1,15 @@
+{
+  "name": "minesweeper-mp",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+    "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "redis": "^6.3.0",
+    "ws": "^8.22.0"
+  }
+}

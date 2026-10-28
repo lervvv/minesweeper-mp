@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Кооперативный сапёр</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>💣 Кооперативный сапёр</h1>
+      <div id="status" class="status">…</div>
+    </header>
+
+    <p class="hint">
+      Это кооперативная игра: создайте комнату и поделитесь кодом с друзьями —
+      все кликают по одному общему полю в реальном времени. Или играйте один,
+      просто не сообщая код никому.
+    </p>
+
+    <!-- LOBBY -->
+    <section id="lobby" class="screen">
+      <div class="card">
+        <h2>Создать комнату</h2>
+        <label>Имя <input id="create-name" maxlength="20" placeholder="Игрок" /></label>
+        <div class="row">
+          <label>Поле
+            <span>
+              <input id="create-rows" type="number" min="3" max="30" value="9" style="width:4em" /> ×
+              <input id="create-cols" type="number" min="3" max="30" value="9" style="width:4em" />
+            </span>
+          </label>
+        </div>
+        <label>Мин <input id="create-mines" type="number" min="1" value="10" style="width:5em" /></label>
+        <button id="btn-create">Создать</button>
+      </div>
+
+      <div class="card">
+        <h2>Присоединиться</h2>
+        <label>Имя <input id="join-name" maxlength="20" placeholder="Игрок" /></label>
+        <label>Код комнаты <input id="join-code" maxlength="10" placeholder="ABCDE" style="text-transform:uppercase" /></label>
+        <button id="btn-join">Войти</button>
+      </div>
+
+      <div id="lobby-error" class="error"></div>
+    </section>
+
+    <!-- GAME -->
+    <section id="game" class="screen hidden">
+      <div class="game-header">
+        <div class="room-info">
+          Комната: <b id="room-code">—</b> · Мин: <b id="mines-left">—</b> · Статус: <b id="game-status">—</b>
+        </div>
+        <div id="players" class="players"></div>
+      </div>
+
+      <div class="board-wrap"><div id="board" class="board"></div></div>
+
+      <div id="banner" class="banner hidden"></div>
+
+      <div class="game-footer">
+        <span class="legend">ЛКМ — открыть · ПКМ — флаг</span>
+        <button id="btn-leave">Выйти</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
