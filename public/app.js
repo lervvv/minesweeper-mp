@@ -30,6 +30,7 @@
     gameStatus: document.getElementById('game-status'),
     players:    document.getElementById('players'),
     banner:     document.getElementById('banner'),
+    btnRestart: document.getElementById('btn-restart'),
   };
 
   const key = (r, c) => `${r},${c}`;
@@ -113,6 +114,7 @@
       case 'conflict':       return onConflict(msg);
       case 'gameOver':       return onGameOver(msg);
       case 'actionRejected': return onRejected(msg);
+      case 'restarted':      return onRestarted(msg);
       case 'error':          return onError(msg);
     }
   }
@@ -170,6 +172,12 @@
     showBanner(msg.status === 'won');
   }
 
+  function onRestarted(msg) {
+    console.log('[restarted]', msg.snapshot?.id);
+    applySnapshot(msg.snapshot);
+    // renderAll() скроет баннер и кнопку «Заново», потому что status = playing.
+  }
+
   function onError(msg) {
     console.error('[server error]', msg.message);
     if (state.pendingRejoin) {
@@ -212,8 +220,13 @@
     renderHeader();
     renderPlayers();
     renderBoard();
-    if (state.snapshot.status !== 'playing') showBanner(state.snapshot.status === 'won');
-    else el.banner.classList.add('hidden');
+
+    const finished = state.snapshot.status !== 'playing';
+    if (finished) showBanner(state.snapshot.status === 'won');
+    else hideBanner();
+
+    // Кнопка «Играть заново» видна только когда партия завершена.
+    el.btnRestart.classList.toggle('hidden', !finished);
   }
 
   function renderHeader() {
@@ -283,6 +296,11 @@
     el.banner.classList.remove('hidden');
   }
 
+  function hideBanner() {
+    el.banner.className = 'banner hidden';
+    el.banner.textContent = '';
+  }
+
   // ---------- Actions ----------
   function tryOpen(row, col) {
     if (!state.snapshot) { console.warn('[tryOpen] snapshot missing'); return; }
@@ -336,8 +354,8 @@
 
     el.board.innerHTML = '';
     el.players.innerHTML = '';
-    el.banner.className = 'banner hidden';
-    el.banner.textContent = '';
+    hideBanner();
+    el.btnRestart.classList.add('hidden');
     el.lobbyError.textContent = '';
 
     showLobby();
@@ -350,9 +368,6 @@
     creatingRoom = true;
     el.lobbyError.textContent = '';
 
-    // ВАЖНО: сбрасываем ВСЁ, что могло привязать нас к старой комнате,
-    // ДО отправки createRoom. Иначе, если WS переподключится между
-    // кликом и ответом сервера, autoRejoin утащит нас обратно в старую игру.
     state.autoRejoin = null;
     state.pendingRejoin = false;
     state.sendQueue = [];
@@ -386,7 +401,12 @@
     goToLobby();
   });
 
-  // ---------- Делегирование событий — вешается ОДИН раз ----------
+  el.btnRestart.addEventListener('click', () => {
+    el.btnRestart.classList.add('hidden'); // защита от даблклика
+    send({ type: 'restartGame' });
+  });
+
+  // ---------- Делегирование на доску ----------
   el.board.addEventListener('click', (e) => {
     const cellEl = e.target.closest('.cell');
     if (!cellEl || !el.board.contains(cellEl)) return;
